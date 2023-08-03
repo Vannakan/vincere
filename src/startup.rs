@@ -1,20 +1,14 @@
 use bevy::{prelude::*, app::PluginGroupBuilder};
 
-pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>){
-    commands.spawn(Camera2dBundle::default());
-
-
-    let texture = asset_server.load("player.png");
-    commands.spawn(SpriteBundle {
-        sprite: Sprite {
-            custom_size: Some(Vec2::new(100.0, 100.0)),
+pub fn setup(mut commands: Commands){
+    commands.spawn(Camera2dBundle {
+        projection: OrthographicProjection {
+            scale: 3.0,
             ..default()
         },
-        texture,
         ..default()
     });
 }
-
 
 pub fn build_default_plugins() -> PluginGroupBuilder {
     DefaultPlugins

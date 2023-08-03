@@ -1,10 +1,12 @@
 use bevy::prelude::*;
-use vincere::{hello::HelloPlugin, startup::{build_default_plugins, setup}, player::character_movement};
+use vincere::{startup::*, window_icon::set_window_icon, map::*, MinionPlugin, PlayerPlugin};
+
 
 fn main() {
     App::new()
-    .add_plugins((build_default_plugins(), HelloPlugin))
+    .add_plugins((build_default_plugins(), PlayerPlugin, MinionPlugin))
     .add_systems(Startup, setup)
-    .add_systems(Update, character_movement)
+    .add_systems(Startup, map)
+    .add_systems(Startup, set_window_icon)
     .run();
 }
