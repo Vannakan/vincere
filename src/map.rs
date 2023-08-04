@@ -3,17 +3,25 @@ use rand::random;
 use bevy::prelude::*;
 use noisy_bevy::simplex_noise_2d_seeded;
 
-const SMOOTHNESS: f32 = 0.3;
-const TILE_SIZE:f32 = 50.0;
+const SMOOTHNESS: f32 = 0.4;
+const TILE_SIZE:f32 = 50.0; //50
 const MAP_WIDTH:i32 = 150;
 const MAP_HEIGHT:i32 = 150;
+
+pub struct MapPlugin;
+
+impl Plugin for MapPlugin {
+    fn build(&self, app: &mut App){
+        app.add_systems(Update, map_regen_pressed);
+    }
+}
 
 #[derive(Component)]
 pub struct Tile;
 
 pub fn map_regen_pressed(mut commands: Commands, keycode: Res<Input<KeyCode>>, query:Query<Entity, &Tile>,  asset_server:Res<AssetServer>){
 
-    if(keycode.pressed(KeyCode::R)){
+    if keycode.pressed(KeyCode::R){
         regen_map(&mut commands, query, asset_server);
     }
 }
@@ -48,10 +56,13 @@ pub fn map(mut commands: &mut Commands, asset_server:Res<AssetServer>){
         let mut x_off = 0.0;
         for y in -MAP_HEIGHT..=MAP_HEIGHT {
             let noise =  simplex_noise_2d_seeded(Vec2 {x :x_off/SMOOTHNESS, y: y_off/SMOOTHNESS }, seed);
-            if noise > 0.0
+            if noise > -0.25 && noise < 0.0
             {
+                spawn_tile(&mut commands, asset_server.load("sand.png"), x as f32 * TILE_SIZE, y as f32 * TILE_SIZE, 0.0);
+            } else if noise > 0.0 {
                 spawn_tile(&mut commands, asset_server.load("grass.png"), x as f32 * TILE_SIZE, y as f32 * TILE_SIZE, 0.0);
-            } else {
+            } 
+            else {
                 spawn_tile(&mut commands, asset_server.load("water.png"), x as f32 * TILE_SIZE, y as f32 * TILE_SIZE, 0.0);
             }
             x_off+=0.01;
