@@ -1,6 +1,6 @@
 use bevy::{prelude::*, app::PluginGroupBuilder};
 
-const CAMERA_ZOOM: f32 = 5.0;
+const CAMERA_ZOOM: f32 = 2.0;
 const WINDOW_HEIGHT: f32 = 1600.0;
 const WINDOW_WIDTH: f32 = 1200.0;
 
