@@ -7,7 +7,13 @@ pub mod minion;
 pub mod builder;
 pub mod campsite;
 pub mod camera;
+pub mod tree;
+pub mod bandit;
+pub mod utility;
 
+pub use utility::*;
+pub use bandit::*;
+pub use tree::*;
 pub use campsite::*;
 pub use player::*;
 pub use minion::*;
