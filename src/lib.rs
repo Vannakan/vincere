@@ -10,7 +10,13 @@ pub mod camera;
 pub mod tree;
 pub mod bandit;
 pub mod utility;
+pub mod ui;
+pub mod combat;
+pub mod movement;
 
+pub use movement::*;
+pub use combat::*;
+pub use ui::*;
 pub use utility::*;
 pub use bandit::*;
 pub use tree::*;

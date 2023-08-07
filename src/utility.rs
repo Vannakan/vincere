@@ -6,9 +6,10 @@ use std::fmt::Debug;
 use crate::Velocity;
 
 pub fn change_state<ToRemove: Bundle>(commands: &mut Commands, entity: Entity, add: impl Bundle){
-    let mut e = commands.get_entity(entity).unwrap();
-    e.remove::<ToRemove>();
-    e.insert(add);
+    if let Some(mut entity) =  commands.get_entity(entity) {
+        entity.remove::<ToRemove>();
+        entity.insert(add);
+    }
 }
 
 pub fn get_nearest_entity(candidates: &mut Vec<(Entity, &Transform)>, builder: Vec3) -> (Entity, Transform) {

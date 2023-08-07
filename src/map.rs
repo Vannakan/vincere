@@ -7,8 +7,8 @@ use crate::spawn_tree;
 
 const SMOOTHNESS: f32 = 0.3;
 const TILE_SIZE:f32 = 50.0; //50
-const MAP_WIDTH:i32 = 50;
-const MAP_HEIGHT:i32 = 50;
+const MAP_WIDTH:i32 = 25;
+const MAP_HEIGHT:i32 = 25;
 
 pub struct MapPlugin;
 
@@ -93,9 +93,14 @@ pub fn map(mut commands: &mut Commands, asset_server: &mut ResMut<AssetServer>){
             } else if noise > 0.0 {
                 spawn_tile(&mut commands, asset_server.load("grass.png"), x as f32 * TILE_SIZE, y as f32 * TILE_SIZE, 0.0);
                  let add_tree = rand.gen_range(0.0..=1.0);
-                 if add_tree >= 0.99
+                 if add_tree >= 0.97 && add_tree < 0.99
                  {
                     spawn_tree(&mut commands, asset_server, Vec3::from((x as f32 * TILE_SIZE, y as f32 * TILE_SIZE, 1.0)))
+                 }
+
+                 else if add_tree >= 0.995
+                 {
+                    spawn_tile(&mut commands, asset_server.load("rock.png"), x as f32 * TILE_SIZE, y as f32 * TILE_SIZE, 1.0);
                  }
             } 
             // Water

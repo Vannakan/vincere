@@ -1,6 +1,6 @@
 use std::borrow::BorrowMut;
 use bevy::{prelude::*, window::PrimaryWindow};
-use crate::{ Velocity, Minion, change_state, get_nearest_entity, avoidance, move_to, Damage, Health};
+use crate::{ Velocity, Minion, change_state, get_nearest_entity, avoidance, Damage, Health, HasUi, BindUi, Attacks, Attack};
 
 #[derive(Component)]
 pub struct Bandit;
@@ -22,11 +22,44 @@ impl Plugin for BanditPlugin {
         app     
          .add_systems(Update, add_bandit)
          .add_systems(Update, bandit_avoidance)
-         .add_systems(Update, bandit_movement)
          .add_systems(Update, check_minion_range)
-         .add_systems(Update, move_to_minion);
+         .add_systems(Update, move_to_minion)
+         .add_systems(Update, attack_minion);
     }
 }
+
+pub fn attack_minion(
+    mut commands: Commands,
+    mut minion_query: Query<(Entity, &mut Attacks, &Damage, &AttackMinion, &Transform), With<Bandit>>,
+    mut bandit_query: Query<(Entity, &Transform), (With<Minion>, Without<Bandit>)>,
+    mut writer: EventWriter<Attack>,
+    time: Res<Time>)
+    {  
+        if minion_query.is_empty() { return; }
+        let bandits  = bandit_query.iter_mut().collect::<Vec<(Entity, &Transform)>>();
+        for mut minion in minion_query.iter_mut()
+        {
+            if let Some(bandit) = bandits.iter().find(|t| 
+                {
+                t.0 == minion.3.0
+                })
+                {
+                    let test = *bandit.1;
+                    if minion.4.translation.distance(bandit.1.translation) > 150.0 
+                        { 
+                            change_state::<AttackMinion>(&mut commands, minion.0, MoveToMinion(minion.3.0,test)) 
+                        }
+                if minion.1.last_attacked > time.elapsed_seconds() - 1.5   { continue; }
+                
+                writer.send(Attack { from:*minion.4 , to: minion.3.0 , damage: minion.2.0 });   
+                minion.1.last_attacked = time.elapsed_seconds();
+        } else {
+            change_state::<AttackMinion>(&mut commands, minion.0, Idle)
+        }
+    }
+}
+
+
 
 // DUPLICATE OF MINION & BUILDER
 
@@ -54,33 +87,47 @@ fn check_minion_range(
 
 fn move_to_minion(
     mut commands: Commands,
-    mut bandit_query: Query<(Entity, &mut Transform, &mut Velocity, &MoveToMinion), With<Bandit>>)
+    mut bandit_query: Query<(Entity, &mut Transform, &mut Velocity, &MoveToMinion), With<Bandit>>,
+    mut minion_query: Query<(Entity, &Transform), (With<Minion>, Without<Bandit>)>,)
     {
         if bandit_query.is_empty(){ return;}
+        let minions  = minion_query.iter_mut().collect::<Vec<(Entity, &Transform)>>();
         for mut bandit in bandit_query.iter_mut()
         {
-            let minion = bandit.3;
-            if bandit.1.translation.distance(minion.1.translation) <  150.0 {   change_state::<MoveToMinion>(&mut commands, bandit.0, AttackMinion(minion.0)); continue; }
-            let direction = (bandit.1.translation - minion.1.translation).normalize();
-            bandit.2.0 -= Vec3{x: direction.x * 25.0, y: direction.y * 25.0, z: 0.0};
+            if let Some(minion) = minions.iter().find(|t| 
+                {
+                t.0 == bandit.3.0
+            })
+                {
+                    if bandit.1.translation.distance(minion.1.translation) <  150.0 {   change_state::<MoveToMinion>(&mut commands, bandit.0, AttackMinion(minion.0)); continue; }
+                    let direction = (bandit.1.translation - minion.1.translation).normalize();
+                    bandit.2.0 -= Vec3{x: direction.x * 25.0, y: direction.y * 25.0, z: 0.0};
+                }
         }
 }
 
 /////////////////////
 
-fn add_bandit(mut commands: Commands, mut asset_server: ResMut<AssetServer>, input: Res<Input<KeyCode>>, q_windows: Query<&Window, With<PrimaryWindow>>,
-    camera_q: Query<(&Camera, &GlobalTransform)>){
+fn add_bandit(
+    mut commands: Commands,
+    mut asset_server: ResMut<AssetServer>,
+    input: Res<Input<KeyCode>>,
+    q_windows: Query<&Window, With<PrimaryWindow>>,
+    camera_q: Query<(&Camera, &GlobalTransform)>,
+    writer: EventWriter<BindUi>)
+    {
         if let Some(position) = q_windows.single().cursor_position(){
         let (camera, camera_transform) = camera_q.single();
-        if(input.just_released(KeyCode::B)){
-            spawn_bandit(&mut commands, &mut asset_server, Vec3::from((camera.viewport_to_world_2d(camera_transform, position).unwrap(), 1.0)))
+        if input.just_released(KeyCode::B)
+        {
+            spawn_bandit(&mut commands, &mut asset_server, Vec3::from((camera.viewport_to_world_2d(camera_transform, position).unwrap(), 1.0)), writer)
         }
     }
 }
 
-fn spawn_bandit(mut commands: &mut Commands, asset_server: &mut ResMut<AssetServer>, position: Vec3){
+fn spawn_bandit(commands: &mut Commands, asset_server: &mut ResMut<AssetServer>, position: Vec3, mut writer: EventWriter<BindUi>){
     let texture = asset_server.load("bandit.png");
-    commands.spawn((SpriteBundle {
+    let entity =  commands.spawn((SpriteBundle {
         sprite: Sprite {
             custom_size: Some(Vec2::new(100.0, 100.0)),
             ..default()
@@ -94,28 +141,20 @@ fn spawn_bandit(mut commands: &mut Commands, asset_server: &mut ResMut<AssetServ
     }, 
     Idle,
     Bandit,
-    Health(10.0),
-    Damage(1.0),
-    Velocity(Vec3::default())));
+    Health{
+        starting: 20.0,
+        current: 20.0
+    },
+    Damage(0.0),
+    Attacks {
+        last_attacked: 0.0
+   },
+    HasUi,
+    Velocity(Vec3::default()))).id();
+
+    writer.send(BindUi(entity, "Bandit".to_string()));
 }
 
-
-pub fn bandit_movement(
-    mut bandit_query: Query<(&mut Transform, &mut Velocity),With<Bandit>>, time: Res<Time>,){
-    for bandit in bandit_query.iter_mut(){
-        let (mut transform, mut velocity) = bandit;
-
-        transform.translation += velocity.0 * time.delta_seconds();
-    
-        if velocity.0.x >= -0.1 && velocity.0.x <= 0.1 && velocity.0.y <= 0.1 && velocity.0.y >= -0.1
-        {
-            velocity.0 = Vec3::default();
-        }
-        else {
-            velocity.0 = velocity.0.lerp(Vec3::default(), 0.1)
-        }
-    }
-}
 
 pub fn bandit_avoidance(mut bandit_query: Query<(&mut Transform, &mut Velocity), With<Bandit>>){
     let mut combinations = bandit_query.iter_combinations_mut();

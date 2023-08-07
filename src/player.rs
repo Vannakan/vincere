@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 
+use crate::{HasUi, BindUi};
+
 const PLAYER_SPEED:f32 = 20.0;
 
 pub struct PlayerPlugin;
@@ -21,13 +23,14 @@ pub struct Velocity(pub Vec3);
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App){
         app.add_systems(Startup, spawn_player)
-        .add_systems(Update, (player_movement, player_input, camera_movement));
+        .add_systems(Update, (player_input, camera_movement));
     }
 }
 
-fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>){
+fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>, mut writer: EventWriter<BindUi>)
+{
     let texture = asset_server.load("player.png");
-    commands.spawn((SpriteBundle {
+    let entity = commands.spawn((SpriteBundle {
         sprite: Sprite {
             custom_size: Some(Vec2::new(100.0, 100.0)),
             ..default()
@@ -40,25 +43,15 @@ fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>){
         ..default()
     },
      Player, 
-     Velocity(Vec3::default())));
-}
+     HasUi,
+     Velocity(Vec3::default()))).id();
 
-pub fn player_movement(mut player_query: Query<(&mut Transform, &mut Velocity), With<Player>>, time: Res<Time>,){
-    let (mut transform, mut velocity) = player_query.single_mut();
-
-    transform.translation += velocity.0 * time.delta_seconds();
-
-    if velocity.0.x >= -0.1 && velocity.0.x <= 0.1 && velocity.0.y <= 0.1 && velocity.0.y >= -0.1
-    {
-        velocity.0 = Vec3::default();
-    }
-    else {
-        velocity.0 = velocity.0.lerp(Vec3::default(), 0.1)
-    }
+     writer.send(BindUi(entity, "Player".to_string()));
 }
 
 pub fn camera_movement(mut player_query: Query<&Transform, With<Player>>,
-    mut camera_query: Query<&mut Transform, (Without<Player>, With<Camera>)>){
+    mut camera_query: Query<&mut Transform, (Without<Player>, With<Camera>)>)
+    {
         let mut camera = camera_query.single_mut();
         let player = player_query.single_mut();
 
