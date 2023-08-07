@@ -86,6 +86,7 @@ fn try_spawn_minion(
     mut c_query: Query<(&Transform, &mut Campsite), (Without<Player>, With<Campsite>)>,
     mut writer: EventWriter<SpawnMinion>)
 {
+    if p_query.is_empty() || c_query.is_empty() { return; }
     if input.just_released(KeyCode::E) == false { return ;}
     let player = p_query.single();
     let (campfire, mut state) = c_query.single_mut(); 

@@ -78,11 +78,15 @@ fn play_attack_sound(
     }
 }
 
+
+const KNOCKBACK: f32 = 1000.0;
+
 fn push_back(mut events: EventReader<PushBack>, mut query: Query<(Entity, &mut Transform, &mut Velocity)>)
 {
     if query.is_empty() { return;}
 
-    for evt in events.iter(){
+    for evt in events.iter()
+    {
         let from = evt.from;
 
         let mut to = {
@@ -97,12 +101,12 @@ fn push_back(mut events: EventReader<PushBack>, mut query: Query<(Entity, &mut T
         };
 
         let direction = (from.translation - to.1.translation).normalize();
-        to.2.0 -= Vec3::from((direction.x * 500.0, direction.y * 500.0, 0.0));
+        to.2.0 -= Vec3::from((direction.x * KNOCKBACK, direction.y * KNOCKBACK, 0.0));
     }
 }
 
 
-fn kill(mut commands: Commands, query: Query<(Entity, &Health)>, mut writer: EventWriter<DestroyUi>)
+fn kill(mut commands: Commands, query: Query<(Entity, &Health)>, mut writer: EventWriter<DestroyUi>, asset_server: Res<AssetServer>)
 {
     for entity in query.iter()
     {
@@ -110,6 +114,10 @@ fn kill(mut commands: Commands, query: Query<(Entity, &Health)>, mut writer: Eve
         {
             writer.send(DestroyUi(entity.0));
             commands.entity(entity.0).despawn();
+            commands.spawn(AudioBundle{
+                source: asset_server.load("audio/death.ogg"),
+                settings: PlaybackSettings { mode: bevy::audio::PlaybackMode::Despawn, ..Default::default() }
+            });
         }
     }
 }

@@ -36,7 +36,7 @@ impl Plugin for EntityUiPlugin {
         app
         .add_systems(Startup, create_ui_root)
         .add_systems(PostStartup, create_tree_ui)
-        .add_systems(Update, (entity_ui, create_ui_binding))
+        .add_systems(Update, (entity_ui_movement, create_ui_binding))
         .add_systems(Update, destroy_ui)
         .add_systems(Update, on_attacked_ui_system)
         .add_systems(Update, update_tree_ui)
@@ -66,7 +66,7 @@ pub fn progress_ui(){
 
 }
 
-pub fn entity_ui (
+pub fn entity_ui_movement (
     mut query_text: Query<(Entity,  &mut Style, &UiTransformBinding), (Without<HasUi>, Without<Camera>, Without<EntityUiRoot>)>, 
     mut query_minion: Query<(Entity, &mut Transform, &HasUi), (Without<Text>, Without<Camera>)>, 
     mut camera_query: Query<(&Camera, &GlobalTransform, &OrthographicProjection), (Without<HasUi>, Without<Text>)>)
@@ -218,9 +218,7 @@ fn add_ui(
 pub struct TreeUi;
 
 pub fn create_tree_ui(mut commands: Commands, query: Query<(Entity, &Node, &Root)>, asset_server: Res<AssetServer>)
-{    println!("TREEUO");
-   // if query.is_empty() { return; }
-
+{
     let mut root = commands.get_entity(query.single().0).unwrap();
 
     root.with_children(|parent| {
