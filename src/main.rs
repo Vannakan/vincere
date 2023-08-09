@@ -1,5 +1,8 @@
+#[cfg(target_arch = "wasm32")]
+console_error_panic_hook::set_once!();
+
 use bevy::prelude::*;
-use vincere::{startup::*, window_icon::set_window_icon, MinionPlugin, PlayerPlugin, BuilderPlugin, CampsitePlugin, MapPlugin, scroll_events, TreePlugin, BanditPlugin, EntityUiPlugin, CombatPlugin, MovementPlugin};
+use vincere::{startup::*, window_icon::set_window_icon, MinionPlugin, PlayerPlugin, BuilderPlugin, CampsitePlugin, MapPlugin, scroll_events, TreePlugin, BanditPlugin, EntityUiPlugin, CombatPlugin, MovementPlugin, kill};
 
 fn main() {
     App::new()
@@ -7,5 +10,6 @@ fn main() {
     .add_systems(Startup, setup)
     .add_systems(Startup, set_window_icon)
     .add_systems(Update, scroll_events)
+    .add_systems(PostUpdate, kill) //despawn logic
     .run();
 }

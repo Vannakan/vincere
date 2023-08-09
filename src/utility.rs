@@ -6,6 +6,7 @@ use std::fmt::Debug;
 use crate::Velocity;
 
 pub fn change_state<ToRemove: Bundle>(commands: &mut Commands, entity: Entity, add: impl Bundle){
+    // CAN FIX THE ISSUE BY HAVING A SYSTEM THAT RUNS LAST THAT RESPAWNS ENTITIES MARKED TO BE DESPAWNED
     if let Some(mut entity) =  commands.get_entity(entity) {
         entity.remove::<ToRemove>();
         entity.insert(add);

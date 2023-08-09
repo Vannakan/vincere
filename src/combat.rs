@@ -4,12 +4,21 @@ use rand::Rng;
 use crate::{DestroyUi, EntityAttacked, Velocity};
 
 #[derive(Event)]
-pub struct Attack
+pub struct AttackEvent
 {
   pub from:Transform,
   pub to: Entity,
   pub damage: f32   
 }
+
+#[derive(Event)]
+pub struct Attack2<'a>
+{
+  pub from: &'a Transform,
+  pub to: Entity,
+  pub damage: f32,
+}
+
 
 
 #[derive(Component)]
@@ -30,8 +39,8 @@ pub struct CombatPlugin;
 
 impl Plugin for CombatPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, (attack_system, kill, push_back, play_attack_sound))
-        .add_event::<Attack>()
+        app.add_systems(Update, (attack_system, push_back, play_attack_sound))
+        .add_event::<AttackEvent>()
         .add_event::<PushBack>();
     }
 }
@@ -43,7 +52,7 @@ pub struct PushBack{
 }
 
 fn attack_system(
-    mut events: EventReader<Attack>, 
+    mut events: EventReader<AttackEvent>, 
     mut query: Query<(Entity, &mut Health)>,
     mut attacked_writer: EventWriter<EntityAttacked>,
     mut push_writer: EventWriter<PushBack>)
@@ -60,6 +69,7 @@ fn attack_system(
         }
     }
 }
+
 
 fn play_attack_sound( 
     mut commands: Commands,
@@ -106,13 +116,14 @@ fn push_back(mut events: EventReader<PushBack>, mut query: Query<(Entity, &mut T
 }
 
 
-fn kill(mut commands: Commands, query: Query<(Entity, &Health)>, mut writer: EventWriter<DestroyUi>, asset_server: Res<AssetServer>)
+pub fn kill(mut commands: Commands, query: Query<(Entity, &Health)>, mut writer: EventWriter<DestroyUi>, asset_server: Res<AssetServer>)
 {
     for entity in query.iter()
     {
         if entity.1.current <= 0.0 
         {
             writer.send(DestroyUi(entity.0));
+             // CAN FIX THE ISSUE BY HAVING A SYSTEM THAT RUNS LAST THAT RESPAWNS ENTITIES MARKED TO BE DESPAWNED run this last
             commands.entity(entity.0).despawn();
             commands.spawn(AudioBundle{
                 source: asset_server.load("audio/death.ogg"),

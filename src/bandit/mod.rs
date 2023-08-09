@@ -1,5 +1,7 @@
+use std::marker::PhantomData;
+
 use bevy::{prelude::*, window::PrimaryWindow};
-use crate::{ Velocity, Damage, Health, HasUi, BindUi, Attacks};
+use crate::{ Velocity, Damage, Health, HasUi, BindUi, Attacks, Targetable, Attackable, AttackInfo, FindTarget, Minion, find_target};
 pub mod components;
 mod attack;
 mod movement;
@@ -13,9 +15,13 @@ impl Plugin for BanditPlugin {
     fn build(&self, app: &mut App){
         app     
          .add_systems(Update, add_bandit)
-         .add_systems(Update, check_minion_range)
+         .add_systems(Update, find_target::<Minion>)
+        // .add_systems(Update, check_minion_range)
+         .add_systems(Update, bandit_found_target)
          .add_systems(Update, move_to_minion)
-         .add_systems(Update, attack_minion);
+         .add_systems(Update, attack_minion)
+         .add_systems(Update, enemy_defeated)
+         .add_systems(Update, default_bandit);
     }
 }
 
@@ -61,7 +67,17 @@ fn spawn_bandit(commands: &mut Commands, asset_server: &mut ResMut<AssetServer>,
     Attacks {
         last_attacked: 0.0
    },
+   AttackInfo {
+    last_attacked: 0.0,
+    cooldown: 1.5,
+    range: 200.0
+    },
+    FindTarget::<Minion> {
+        phantom: PhantomData
+    },
     HasUi,
+    Targetable,
+    Attackable,
     Velocity(Vec3::default()))).id();
 
     writer.send(BindUi(entity, "Bandit".to_string()));

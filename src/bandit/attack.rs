@@ -1,34 +1,80 @@
+use std::marker::PhantomData;
+
 use bevy::prelude::*;
 
-use crate::{Attacks, Damage, Attack, Minion, change_state};
+use crate::{Attacks, Damage, Minion, change_state, AttackEvent, HasTarget, FindTarget, Attack, MoveTo};
 
 use super::components::{AttackMinion, Bandit, MoveToMinion, Idle};
 
 pub fn attack_minion(
     mut commands: Commands,
-    mut minion_query: Query<(Entity, &mut Attacks, &Damage, &AttackMinion, &Transform), With<Bandit>>,
-    mut bandit_query: Query<(Entity, &Transform), (With<Minion>, Without<Bandit>)>,
-    mut writer: EventWriter<Attack>,
+    mut bandit_query: Query<(Entity, &mut Attacks, &Damage, &Attack, &Transform, &HasTarget), With<Bandit>>,
+    mut minion_query: Query<(Entity, &Transform), (With<Minion>, Without<Bandit>)>,
+    mut writer: EventWriter<AttackEvent>,
     time: Res<Time>)
 {  
-    if minion_query.is_empty() { return; }
-    let bandits  = bandit_query.iter_mut().collect::<Vec<(Entity, &Transform)>>();
-    for mut minion in minion_query.iter_mut()
+    if bandit_query.is_empty() || minion_query.is_empty() { return; }
+    let minions  = minion_query.iter_mut().collect::<Vec<(Entity, &Transform)>>();
+    for mut bandit in bandit_query.iter_mut()
     {
-        if let Some(bandit) = bandits.iter().find(|t| t.0 == minion.3.0)
-        {
-            let test = *bandit.1;
-            if minion.4.translation.distance(bandit.1.translation) > 75.0 
-                { 
-                    change_state::<AttackMinion>(&mut commands, minion.0, MoveToMinion(minion.3.0,test)) 
+        let target = match bandit.5.target {
+            Some(t) => t,
+            _ => {
+                {
+                    reset_bandit_state(&mut commands, bandit.0);
+                    continue;
                 }
-            if minion.1.last_attacked > time.elapsed_seconds() - 1.5   { continue; }
-        
-            writer.send(Attack { from:*minion.4 , to: minion.3.0 , damage: minion.2.0 });   
-            minion.1.last_attacked = time.elapsed_seconds();
-        } else 
+            }
+        };
+
+        match minions.iter().find(|t| t.0 == target)
         {
-            change_state::<AttackMinion>(&mut commands, minion.0, Idle)
-        }
+            Some(t) => 
+            {
+                if bandit.4.translation.distance(t.1.translation) > 75.0 
+                    { 
+                        change_state::<Attack>(&mut commands, bandit.0, MoveTo) 
+                    }
+                if bandit.1.last_attacked > time.elapsed_seconds() - 1.5   { continue; }
+                writer.send(AttackEvent { from:bandit.4.clone() , to: target , damage: bandit.2.0 });   
+                bandit.1.last_attacked = time.elapsed_seconds();
+            },
+            _ => {
+                reset_bandit_state(&mut commands, bandit.0);
+                continue;
+            }
+        };
+    }
+}
+
+pub fn reset_bandit_state(mut commands: &mut Commands, entity: Entity) {
+
+    let mut e = commands.get_entity(entity).unwrap();
+    e.remove::<Attack>();
+    e.remove::<HasTarget>();
+    e.remove::<MoveTo>();
+    e.insert(FindTarget::<Minion> {
+        phantom: PhantomData
+    });
+    e.insert(Idle);
+}
+
+pub fn enemy_defeated(mut commands: Commands, query: Query<(Entity, &HasTarget), With<Bandit>>){
+    for entity in query.iter(){
+        let target = match(entity.1.target){
+            Some(t) => t,
+            _ => {
+                reset_bandit_state(&mut commands, entity.0);
+                continue;
+            }
+        };
+
+        match commands.get_entity(target) {
+            Some(_) => continue,
+            _ => {
+                reset_bandit_state(&mut commands, entity.0);
+                continue;
+            }
+        };
     }
 }

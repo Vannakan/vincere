@@ -16,3 +16,4 @@ rand = { version = "*" }
 winit = { version = "*"}
 image = { version = "*"}
 noisy_bevy = { version = "*"}
+console_error_panic_hook = "0.1"
