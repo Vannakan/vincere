@@ -11,7 +11,8 @@ opt-level = 1
 opt-level = 3
 
 [dependencies]
-bevy = { version = "0.11", features = ["dynamic_linking"]}
+bevy = { version = "0.11", features = ["dynamic_linking", "wav" ]}
+bevy-inspector-egui = { version = "0.19"}
 rand = { version = "*" }
 winit = { version = "*"}
 image = { version = "*"}

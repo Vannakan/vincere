@@ -1,7 +1,11 @@
 use bevy::{prelude::*, window::PrimaryWindow};
 
+use crate::Minimap;
+
 #[derive(Component)]
 pub struct Tree;
+#[derive(Component)]
+pub struct Prop;
 
 pub struct TreePlugin;
 
@@ -24,7 +28,8 @@ pub fn spawn_tree(commands: &mut Commands, asset_server: &mut ResMut<AssetServer
             ..default()
         },
         ..default()
-    }, Tree));
+    }, Tree,
+    Prop));
 }
 
 fn add_tree(
@@ -32,7 +37,7 @@ fn add_tree(
     mut asset_server: ResMut<AssetServer>,
     input: Res<Input<KeyCode>>,
     q_windows: Query<&Window, With<PrimaryWindow>>,
-    camera_q: Query<(&Camera, &GlobalTransform)>)
+    camera_q: Query<(&Camera, &GlobalTransform),  Without<Minimap>>)
     {
         if let Some(position) = q_windows.single().cursor_position(){
         let (camera, camera_transform) = camera_q.single();

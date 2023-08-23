@@ -3,8 +3,7 @@ use std::borrow::BorrowMut;
 use bevy::prelude::*;
 use rand::Rng;
 
-use crate::{Velocity, Player};
-
+use crate::{common::components::Velocity, player::components::Player};
 pub struct MovementPlugin;
 
 impl Plugin for MovementPlugin {
@@ -52,16 +51,3 @@ pub fn calc_avoidance(a: Vec3, b: Vec3) -> Vec3{
     let direction = (a - b).normalize();
     Vec3{x: direction.x * 25.0, y: direction.y * 25.0, z: 0.0}
 }
-
-#[derive(Component)]
-pub struct AABB{
-    x: f32,
-    y: f32,
-    size: f32
-}
-
-fn collision(query: Query<(Entity, &AABB, &Transform)>)
-{
-
-}
-

@@ -1,8 +1,10 @@
-use bevy::{input::mouse::MouseWheel, prelude::{EventReader, Query, OrthographicProjection}};
+use bevy::{input::mouse::MouseWheel, prelude::{EventReader, Query, OrthographicProjection, Without}};
+
+use crate::Minimap;
 
 pub fn scroll_events(
     mut scroll_evr: EventReader<MouseWheel>,
-    mut query: Query<&mut OrthographicProjection>)
+    mut query: Query<&mut OrthographicProjection, Without<Minimap>>)
  {
     use bevy::input::mouse::MouseScrollUnit;
     for ev in scroll_evr.iter() {

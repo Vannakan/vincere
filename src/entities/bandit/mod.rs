@@ -1,22 +1,29 @@
 use std::marker::PhantomData;
 
 use bevy::{prelude::*, window::PrimaryWindow};
-use crate::{ Velocity, Damage, Health, HasUi, BindUi, Attacks, Targetable, Attackable, AttackInfo, FindTarget, Minion, find_target};
-pub mod components;
-mod attack;
-mod movement;
+use crate::combat::components::{Attacks, Damage, Health, AttackInfo, FindTarget, Attackable};
+use crate::common::components::Targetable;
+use crate::combat::systems::find_target_with_targetable;
+use crate::ui::components::HasUi;
+use crate::ui::events::BindUi;
+use crate::{ Minion, Inventory, Minimap};
 
-use crate::bandit::attack::*;
-use crate::bandit::movement::*;
-use crate::bandit::components::*;
+use crate::common::components::Velocity;
+pub mod components;
+pub mod attack;
+pub mod movement;
+
+use self::attack::*;
+use self::movement::*;
+use self::components::*;
+
 pub struct BanditPlugin;
 
 impl Plugin for BanditPlugin {
     fn build(&self, app: &mut App){
         app     
          .add_systems(Update, add_bandit)
-         .add_systems(Update, find_target::<Minion>)
-        // .add_systems(Update, check_minion_range)
+         .add_systems(Update, find_target_with_targetable::<Minion>)
          .add_systems(Update, bandit_found_target)
          .add_systems(Update, move_to_minion)
          .add_systems(Update, attack_minion)
@@ -25,13 +32,12 @@ impl Plugin for BanditPlugin {
     }
 }
 
-
 fn add_bandit(
     mut commands: Commands,
     mut asset_server: ResMut<AssetServer>,
     input: Res<Input<KeyCode>>,
     q_windows: Query<&Window, With<PrimaryWindow>>,
-    camera_q: Query<(&Camera, &GlobalTransform)>,
+    camera_q: Query<(&Camera, &GlobalTransform), Without<Minimap>>,
     writer: EventWriter<BindUi>)
     {
         if let Some(position) = q_windows.single().cursor_position(){
@@ -76,6 +82,9 @@ fn spawn_bandit(commands: &mut Commands, asset_server: &mut ResMut<AssetServer>,
         phantom: PhantomData
     },
     HasUi,
+    Inventory{
+        coins: 3,
+    },
     Targetable,
     Attackable,
     Velocity(Vec3::default()))).id();

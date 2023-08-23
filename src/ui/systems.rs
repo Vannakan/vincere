@@ -1,51 +1,8 @@
 use bevy::prelude::*;
 
-use crate::Campsite;
+use crate::{Campsite, Inventory, Minimap, player::components::Player};
 
-#[derive(Component)]
-pub struct Root;
-
-#[derive(Event)]
-pub struct DestroyUi(pub Entity);
-
-#[derive(Event)]
-pub struct BindUi(pub Entity, pub String);
-
-#[derive(Component)]
-pub struct UiTransformBinding {
-    ui_entity: Entity,
-    y_offset: f32,
-}
-
-#[derive(Component)]
-pub struct HasUi;
-
-#[derive(Component)]
-pub struct HealthBar;
-
-#[derive(Component)]
-pub struct EntityUiRoot;
-
-const X_OFFSET: f32 = -15.0;
-const Y_OFFSET: f32 = -50.0;
-
-pub struct EntityUiPlugin;
-
-impl Plugin for EntityUiPlugin {
-    fn build(&self, app: &mut App) {
-        app
-        .add_systems(Startup, create_ui_root)
-        .add_systems(PostStartup, create_tree_ui)
-        .add_systems(Update, (entity_ui_movement, create_ui_binding))
-        .add_systems(Update, destroy_ui)
-        .add_systems(Update, on_attacked_ui_system)
-        .add_systems(Update, update_tree_ui)
-        .add_event::<BindUi>()
-        .add_event::<DestroyUi>()
-        .add_event::<EntityAttacked>();
-    }
-}
-
+use super::{components::{UiTransformBinding, HasUi, EntityUiRoot, Root, HealthBar, TreeUi, PlayerGoldUi}, events::{DestroyUi, BindUi, EntityAttacked}, X_OFFSET, Y_OFFSET};
 pub fn destroy_ui(
     mut commands: Commands,
     query_text: Query<(Entity, &EntityUiRoot, &UiTransformBinding), (Without<HasUi>, Without<Camera>)>,
@@ -62,14 +19,10 @@ pub fn destroy_ui(
     }
 }
 
-pub fn progress_ui(){
-
-}
-
 pub fn entity_ui_movement (
     mut query_text: Query<(Entity,  &mut Style, &UiTransformBinding), (Without<HasUi>, Without<Camera>, Without<EntityUiRoot>)>, 
     mut query_minion: Query<(Entity, &mut Transform, &HasUi), (Without<Text>, Without<Camera>)>, 
-    mut camera_query: Query<(&Camera, &GlobalTransform, &OrthographicProjection), (Without<HasUi>, Without<Text>)>)
+    mut camera_query: Query<(&Camera, &GlobalTransform, &OrthographicProjection), (Without<HasUi>, Without<Text>, Without<Minimap>)>)
     {
         if query_minion.is_empty() { return ;}
         let camera = camera_query.single_mut();
@@ -113,19 +66,11 @@ pub fn create_ui_binding(mut event_reader: EventReader<BindUi>, query: Query<Ent
             ui_entity: evt.0,
             y_offset: -10.0,
         };
-        println!("ADD UI");
         add_ui(&mut commands, root, &asset_server, binding, binding2, binding3,binding4,&evt.1);
     }
 }
 
-#[derive(Event)]
-pub struct EntityAttacked{
-    pub entity: Entity,
-    pub health_left: f32,
-    pub starting_health: f32
-}
-
-fn on_attacked_ui_system(
+pub fn on_attacked_ui_system(
     mut events: EventReader<EntityAttacked>,
     mut hp: Query<(&mut Style, &UiTransformBinding), With<HealthBar>>
     ){
@@ -145,7 +90,8 @@ fn on_attacked_ui_system(
     }
 }
 
-fn add_ui(
+
+pub fn add_ui(
     commands: &mut Commands,
     root: Entity, asset_server: &ResMut<AssetServer>,
     binding: impl Component,
@@ -154,7 +100,7 @@ fn add_ui(
     binding4: impl Component, 
     text: &String)
     {
-    println!("ADD UI");
+    println!("ADD UI for {}", text);
     let entity_ui_root = commands
     .spawn((NodeBundle {
         style: Style {
@@ -214,8 +160,7 @@ fn add_ui(
     commands.get_entity(root).unwrap().add_child(entity_ui_root);
 }
 
-#[derive(Component)]
-pub struct TreeUi;
+
 
 pub fn create_tree_ui(mut commands: Commands, query: Query<(Entity, &Node, &Root)>, asset_server: Res<AssetServer>)
 {
@@ -249,7 +194,6 @@ pub fn update_tree_ui(mut query: Query<(Entity, &TreeUi, &mut Text)>, c_query: Q
 
 pub fn create_ui_root(mut commands: Commands)
 {
-    println!("Roo");
     commands
         .spawn((NodeBundle {
             style: Style {
@@ -263,3 +207,74 @@ pub fn create_ui_root(mut commands: Commands)
         Root));
 }
 
+pub fn create_gold_ui(mut commands: Commands, asset_server: Res<AssetServer>, query: Query<(Entity, &Node, &Root)>){
+
+    if(query.is_empty()) { return; }
+    let mut root = commands.get_entity(query.single().0).unwrap();
+
+    root.with_children(|parent| {
+        parent.spawn(
+        //     (ImageBundle{
+        //     style: Style { 
+        //         width: Val::Px(128.0),
+        //         height: Val::Px(128.0),
+        //         right: Val::Px(700.0),
+        //         bottom: Val::Px(200.0),
+        //         position_type: PositionType::Absolute,
+        //         ..Default::default()
+        //     },
+        //     image: asset_server.load("gold.png").into(),
+        //     ..Default::default()
+        // },
+        (TextBundle::from_section(
+            "Gold:",
+            TextStyle {
+                font: asset_server.load("Kenney Pixel.ttf"),
+                font_size: 40.0,
+                color: Color::WHITE,
+            },
+        ),
+        PlayerGoldUi));
+    });
+}
+
+
+
+pub fn update_player_gold_ui(mut p_query: Query<(&Player, &Inventory)>, mut ui_query: Query<(&PlayerGoldUi, &mut Text)>){
+    if p_query.is_empty() || ui_query.is_empty() { return ;}
+    let (_, inventory ) = p_query.single();
+    let (_, mut text) = ui_query.single_mut();
+
+    text.sections[0].value = format!("Gold: {}", inventory.coins);
+}
+
+pub fn create_player_ui(mut commands: Commands, asset_server: Res<AssetServer>){
+    commands.spawn(ImageBundle{
+        style: Style { 
+            width: Val::Px(128.0),
+            height: Val::Px(128.0),
+            right: Val::Px(700.0),
+            bottom: Val::Px(200.0),
+            position_type: PositionType::Absolute,
+            ..Default::default()
+        },
+        image: asset_server.load("war-horn.png").into(),
+        ..Default::default()
+    });
+}
+
+
+pub fn create_peasant_ui(mut commands: Commands, asset_server: Res<AssetServer>){
+    commands.spawn(ImageBundle{
+        style: Style { 
+            width: Val::Px(128.0),
+            height: Val::Px(128.0),
+            right: Val::Px(700.0),
+            bottom: Val::Px(200.0),
+            position_type: PositionType::Absolute,
+            ..Default::default()
+        },
+        image: asset_server.load("war-horn.png").into(),
+        ..Default::default()
+    });
+}

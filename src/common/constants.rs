@@ -1,0 +1,1 @@
+pub const ACTION_COOLDOWN: f32 = 3.0;

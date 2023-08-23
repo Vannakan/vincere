@@ -2,9 +2,14 @@ use std::marker::PhantomData;
 
 use bevy::prelude::*;
 
-use crate::{Attacks, Damage, Minion, change_state, AttackEvent, HasTarget, FindTarget, Attack, MoveTo};
+use crate::combat::components::{Attacks, Damage, HasTarget, FindTarget};
+use crate::combat::events::AttackEvent;
+use crate::{ Minion, change_state, BANDIT_ATTACK_RANGE};
+use crate::MoveTo;
 
-use super::components::{AttackMinion, Bandit, MoveToMinion, Idle};
+use crate::Attack;
+
+use super::components::{Bandit, Idle};
 
 pub fn attack_minion(
     mut commands: Commands,
@@ -31,7 +36,7 @@ pub fn attack_minion(
         {
             Some(t) => 
             {
-                if bandit.4.translation.distance(t.1.translation) > 75.0 
+                if bandit.4.translation.distance(t.1.translation) > BANDIT_ATTACK_RANGE 
                     { 
                         change_state::<Attack>(&mut commands, bandit.0, MoveTo) 
                     }
