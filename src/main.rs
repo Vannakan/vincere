@@ -1,11 +1,23 @@
 use bevy::prelude::*;
-use vincere::{startup::*, window_icon::set_window_icon, map::*, MinionPlugin, PlayerPlugin, BuilderPlugin, CampsitePlugin, MapPlugin, scroll_events, TreePlugin, BanditPlugin};
+use vincere::{
+    // startup::*, 
+    // window_icon::set_window_icon,
+    ui::plugin::EntityUiPlugin,
+    combat::plugin::CombatPlugin,
+    entities::plugin::EntitiesPlugin, DebugPlugin, game::plugin::GamePlugin, SetupPlugin,
+};
 
 fn main() {
     App::new()
-    .add_plugins((build_default_plugins(), PlayerPlugin, MinionPlugin, BuilderPlugin, CampsitePlugin, MapPlugin, TreePlugin, BanditPlugin))
-    .add_systems(Startup, setup)
-    .add_systems(Startup, set_window_icon)
-    .add_systems(Update, scroll_events)
+    .add_plugins((
+      //  build_default_plugins(),
+        SetupPlugin,
+        GamePlugin,
+        EntitiesPlugin,
+        EntityUiPlugin, 
+        CombatPlugin, 
+
+))
+    .add_plugins(DebugPlugin)
     .run();
 }
