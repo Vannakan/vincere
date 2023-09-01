@@ -3,17 +3,9 @@ use std::marker::PhantomData;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 
-use crate::combat::components::AttackInfo;
-use crate::combat::components::Attackable;
-use crate::combat::components::Attacks;
-use crate::combat::components::Damage;
-use crate::combat::components::FindTarget;
-use crate::combat::components::HasTarget;
-use crate::combat::components::Health;
+use crate::combat::components::*;
 use crate::combat::events::AttackEvent;
-use crate::common::components::FollowPlayer;
-use crate::common::components::Targetable;
-use crate::common::components::BoundingBox;
+use crate::common::components::*;
 use crate::constants::WARRIOR_ATTACK_RANGE;
 use crate::game::camera::Minimap;
 use crate::player::components::Player;
@@ -162,9 +154,6 @@ fn blank_minion_state(mut commands: &mut Commands, entity: Entity) {
     e.remove::<FollowPlayer>();
 }
 
-#[derive(Component)]
-pub struct Attack;
-
 #[derive(Event)]
 pub struct TargetClicked<T: Component>(Entity, PhantomData<T>);
 
@@ -273,9 +262,6 @@ pub fn stay_in_range<TAttacker: Component>
         }
     }
 }
-
-#[derive(Component)]
-pub struct MoveTo;
 
 pub fn default_minion(mut commands: Commands, query: Query<Entity, (With<Minion>, Without<MoveTo>, Without<HasTarget>, Without<FollowPlayer>, Without<Attack>, Without<MoveTo>)>){
     if query.is_empty() { return; }

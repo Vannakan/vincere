@@ -6,7 +6,6 @@ pub struct PushBack{
     pub to: Entity,
 }
 
-
 #[derive(Event)]
 pub struct AttackEvent
 {

@@ -1,8 +1,9 @@
 use bevy::prelude::*;
 
-use crate::combat::components::HasTarget;
+use crate::{combat::components::HasTarget, common::components::MoveTo};
+use crate::common::components::Attack;
 use crate::constants::BANDIT_ATTACK_RANGE;
-use crate::entities::minion::{MoveTo, Attack, Minion};
+use crate::entities::minion::Minion;
 use crate::change_state;
 use crate::common::components::Velocity;
 use super::{components::{Bandit, Idle}, attack::reset_bandit_state};

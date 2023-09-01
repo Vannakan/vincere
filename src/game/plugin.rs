@@ -1,6 +1,6 @@
 use bevy::prelude::Plugin;
 
-use crate::{gold::GoldPlugin, camp::CampPlugin, tree::TreePlugin, campsite::CampsitePlugin};
+use crate::{gold::GoldPlugin, camp::CampPlugin, tree::TreePlugin, campsite::CampsitePlugin, player::plugin::PlayerPlugin, camera::CameraSetupPlugin};
 
 use super::{movement::MovementPlugin, map::MapPlugin};
 
@@ -14,6 +14,8 @@ impl Plugin for GamePlugin {
             TreePlugin,
             CampsitePlugin, 
             MovementPlugin,
-            MapPlugin  ));
+            MapPlugin,
+            PlayerPlugin,
+            CameraSetupPlugin));
     }
 }

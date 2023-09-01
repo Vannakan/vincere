@@ -1,20 +1,23 @@
 use bevy::{input::mouse::MouseWheel, prelude::{EventReader, Query, OrthographicProjection, Without}};
 
-use bevy::{prelude::*, app::PluginGroupBuilder, render::{camera::Viewport, view::RenderLayers}, core_pipeline::clear_color::ClearColorConfig};
+use bevy::{prelude::*, render::{camera::Viewport, view::RenderLayers}, core_pipeline::clear_color::ClearColorConfig};
 
 use crate::constants::{MINIMAP_WIDTH, WINDOW_WIDTH, WINDOW_HEIGHT, MINIMAP_HEIGHT, CAMERA_ZOOM};
 
-// const CAMERA_ZOOM: f32 = 2.0;
-// const WINDOW_HEIGHT: f32 = 1200.0;
-// const WINDOW_WIDTH: f32 = 1600.0;
-// const MINIMAP_HEIGHT: f32 = 256.0;
-// const MINIMAP_WIDTH: f32 = 256.0;
+pub struct CameraSetupPlugin;
+
+impl Plugin for CameraSetupPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(Startup, setup_camera)
+        .add_systems(Update, scroll_events);
+    }
+}
 
 #[derive(Component)]
 pub struct Minimap {}
 
 // move cam to camera mod
-pub fn setup(mut commands: Commands){
+pub fn setup_camera(mut commands: Commands){
     commands.spawn((Camera2dBundle {
         projection: OrthographicProjection {
             scale: 20.0,

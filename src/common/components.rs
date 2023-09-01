@@ -28,6 +28,12 @@ pub struct Target{
 #[derive(Component)]
 pub struct Targetable;
 
+#[derive(Component)]
+pub struct Attack;
+
+#[derive(Component)]
+pub struct MoveTo;
+
 // #[derive(Component)]
 // pub struct Target(pub Entity);
 

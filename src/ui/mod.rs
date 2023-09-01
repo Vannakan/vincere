@@ -1,6 +1,5 @@
 use bevy::{prelude::*, ui::widget::UiImageSize};
 
-use crate::{ player::components::Player};
 
 use self::{components::{UiTransformBinding, HasUi, EntityUiRoot, Root, HealthBar}, events::{DestroyUi, BindUi}};
 

@@ -6,3 +6,4 @@ pub mod plugin;
 pub mod movement;
 pub mod map;
 pub mod camera;
+pub mod player;

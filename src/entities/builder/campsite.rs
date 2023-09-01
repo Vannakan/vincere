@@ -3,7 +3,7 @@ use std::marker::PhantomData;
 use bevy::prelude::*;
 use crate::combat::components::{FindTarget, HasTarget};
 use crate::common::constants::ACTION_COOLDOWN;
-use crate::entities::minion::MoveTo;
+use crate::common::components::MoveTo;
 use crate::game::campsite::Campsite;
 use crate::game::tree::Tree;
 use crate::{builder::components::*, change_state};

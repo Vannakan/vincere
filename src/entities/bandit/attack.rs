@@ -4,8 +4,10 @@ use bevy::prelude::*;
 
 use crate::combat::components::{Attacks, Damage, HasTarget, FindTarget};
 use crate::combat::events::AttackEvent;
+use crate::common::components::Attack;
+use crate::common::components::MoveTo;
 use crate::constants::BANDIT_ATTACK_RANGE;
-use crate::entities::minion::{Minion, Attack, MoveTo};
+use crate::entities::minion::Minion;
 use crate::change_state;
 
 use super::components::{Bandit, Idle};

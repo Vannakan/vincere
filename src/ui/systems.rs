@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{player::components::Player, game::{gold::Inventory, campsite::Campsite, camera::Minimap}};
+use crate::{game::{gold::Inventory, campsite::Campsite, camera::Minimap}, player::components::Player};
 
 use super::{components::{UiTransformBinding, HasUi, EntityUiRoot, Root, HealthBar, TreeUi, PlayerGoldUi}, events::{DestroyUi, BindUi, EntityAttacked}, X_OFFSET, Y_OFFSET};
 pub fn destroy_ui(

@@ -1,8 +1,9 @@
 use bevy::prelude::*;
-use crate::{common::components::Velocity, player_war_horn};
+use crate::common::components::Velocity;
 
 use super::movement::camera_movement;
 use super::movement::player_input;
+use super::player_war_horn;
 use super::{spawn_player, components::Player};
 
 pub struct PlayerPlugin;

@@ -4,18 +4,16 @@ use bevy::prelude::*;
 use rand::Rng;
 use crate::combat::components::{HasTarget, FindTarget};
 use crate::common::constants::ACTION_COOLDOWN;
-use crate::entities::minion::MoveTo;
+use crate::common::components::MoveTo;
 use crate::game::campsite::Campsite;
 use crate::game::tree::Tree;
-use crate::{change_state};
+use crate::change_state;
 use crate::common::components::Velocity;
 
 use super::components::{CutTree, Builder, Action, MovingTo};
 
-
 const MAX_TREES: i32 = 10;
-
-                              
+                      
 pub fn cut_tree(
     mut commands: Commands,
     mut query: Query<(Entity, &mut CutTree, &mut Builder, &mut Action)>,

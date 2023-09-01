@@ -13,13 +13,12 @@ impl Plugin for CampPlugin {
     }
 }
 
-
 #[derive(Component)]
 pub struct Camp;
 
 pub fn spawn_camp_2(mut commands: &mut Commands, asset_server: &Res<AssetServer>, mut writer: &mut EventWriter<BindUi>, pos: Vec2){
     let texture = asset_server.load("fire.png");
-    let entity = commands.spawn((SpriteBundle {
+    let _ = commands.spawn((SpriteBundle {
         sprite: Sprite {
             custom_size: Some(Vec2::new(64.0, 64.0)),
             ..default()
@@ -47,7 +46,7 @@ pub fn spawn_camp_2(mut commands: &mut Commands, asset_server: &Res<AssetServer>
 
 pub fn spawn_camp(mut commands: Commands, asset_server: Res<AssetServer>, mut writer: EventWriter<BindUi>){
     let texture = asset_server.load("fire.png");
-    let entity = commands.spawn((SpriteBundle {
+    let _ = commands.spawn((SpriteBundle {
         sprite: Sprite {
             custom_size: Some(Vec2::new(64.0, 64.0)),
             ..default()

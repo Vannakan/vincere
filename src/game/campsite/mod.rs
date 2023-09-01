@@ -111,7 +111,6 @@ fn spawn_campsite(commands: &mut Commands, position: Vec3, asset_server: &Res<As
     commands.spawn((SpriteBundle {
         sprite: Sprite {
              custom_size: Some(Vec2::new(150.0, 150.0)),
-            // color: Color::ORANGE_RED,
             ..default()
         },
         texture: asset_server.load("fire.png"),

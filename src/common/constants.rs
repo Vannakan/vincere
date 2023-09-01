@@ -29,7 +29,7 @@ pub const WARRIOR_ATTACK_RANGE: f32 = 75.0;
 pub const KNOCKBACK: f32 = 1000.0;
 
 // Window
-pub const WINDOW_HEIGHT: f32 = 1600.0;
+pub const WINDOW_HEIGHT: f32 = 1200.0;
 pub const WINDOW_WIDTH: f32 = 1200.0;
 
 // Camera

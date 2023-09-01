@@ -1,7 +1,4 @@
-pub mod startup;
-pub mod player;
-pub mod window_icon;
-pub mod camera;
+pub mod setup;
 pub mod utility;
 pub mod ui;
 pub mod combat;
@@ -17,6 +14,4 @@ pub use common::*;
 pub use combat::*; 
 pub use ui::*;
 pub use utility::*;
-pub use player::*;
-pub use startup::*;
-pub use camera::*;
+pub use setup::*;
