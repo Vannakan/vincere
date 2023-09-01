@@ -93,9 +93,9 @@ pub fn map(mut commands: &mut Commands, asset_server: &Res<AssetServer>, mut wri
         let mut x_off = 0.0;
         for y in -MAP_WIDTH..=MAP_HEIGHT {
             // Distance from center
-            let centerX =  x * x;
-            let centerY =  y * y;
-            let result = f32::sqrt(centerX as f32 + centerY as f32) / (MAP_WIDTH*2) as f32;
+            let center_x =  x * x;
+            let center_y =  y * y;
+            let result = f32::sqrt(center_x as f32 + center_y as f32) / (MAP_WIDTH*2) as f32;
             // Fractal Noise 
             let noise =  fbm_simplex_2d_seeded(Vec2{x :x_off  , y: y_off  }, OCTAVES, LACUNARITY, GAIN, seed);
 
