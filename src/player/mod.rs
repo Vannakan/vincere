@@ -4,9 +4,9 @@ pub mod movement;
 
 use bevy::prelude::*;
 
+use crate::game::gold::Inventory;
 use crate::ui::components::HasUi;
 use crate::ui::events::BindUi;
-use crate::{Inventory, Minimap};
 
 use crate::common::components::BoundingBox;
 use crate::common::components::Velocity;

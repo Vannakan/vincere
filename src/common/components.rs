@@ -10,6 +10,13 @@ pub struct BoundingBox {
     pub height: f32
 }
 
+impl BoundingBox {
+    pub fn intersects(&self, self_pos: Vec3, other: &BoundingBox, other_pos: Vec3) -> bool
+    {
+      self_pos.x < self_pos.x + other.width && self_pos.x + self.width > other_pos.x && self_pos.y < other_pos.y + other.height && self_pos.y + self.height > other_pos.y
+    }
+}
+
 #[derive(Component)]
 pub struct FollowPlayer;
 

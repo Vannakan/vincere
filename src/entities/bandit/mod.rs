@@ -4,9 +4,11 @@ use bevy::{prelude::*, window::PrimaryWindow};
 use crate::combat::components::{Attacks, Damage, Health, AttackInfo, FindTarget, Attackable};
 use crate::common::components::Targetable;
 use crate::combat::systems::find_target_with_targetable;
+use crate::common::components::BoundingBox;
+use crate::game::camera::Minimap;
+use crate::game::gold::Inventory;
 use crate::ui::components::HasUi;
 use crate::ui::events::BindUi;
-use crate::{ Minion, Inventory, Minimap};
 
 use crate::common::components::Velocity;
 pub mod components;
@@ -16,6 +18,8 @@ pub mod movement;
 use self::attack::*;
 use self::movement::*;
 use self::components::*;
+
+use super::minion::Minion;
 
 pub struct BanditPlugin;
 
@@ -77,6 +81,10 @@ fn spawn_bandit(commands: &mut Commands, asset_server: &mut ResMut<AssetServer>,
     last_attacked: 0.0,
     cooldown: 1.5,
     range: 200.0
+    },
+    BoundingBox {
+        height: 100.0,
+        width: 100.0
     },
     FindTarget::<Minion> {
         phantom: PhantomData

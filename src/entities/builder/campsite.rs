@@ -3,7 +3,10 @@ use std::marker::PhantomData;
 use bevy::prelude::*;
 use crate::combat::components::{FindTarget, HasTarget};
 use crate::common::constants::ACTION_COOLDOWN;
-use crate::{builder::components::*, change_state, Campsite, MoveTo, Tree};
+use crate::entities::minion::MoveTo;
+use crate::game::campsite::Campsite;
+use crate::game::tree::Tree;
+use crate::{builder::components::*, change_state};
 use crate::common::components::Velocity;
 
 pub fn find_campsite(mut commands: Commands, mut query: Query<(Entity, &Transform), (With<Builder>, With<FindTarget::<Campsite>>)>, mut campfire_query: Query<(&Campsite, Entity, &Transform)>)

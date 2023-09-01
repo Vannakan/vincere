@@ -2,11 +2,14 @@ use bevy::{prelude::*, window::PrimaryWindow};
 use rand::Rng;
 
 use crate::builder::spawn_builder;
+use crate::entities::minion::SpawnMinion;
+use crate::game::gold::Inventory;
 use crate::player::components::Player;
 use crate::ui::events::BindUi;
-use crate::{SpawnMinion, Inventory, Minimap};
 
 use crate::common::components::BoundingBox;
+
+use super::camera::Minimap;
 
 #[derive(Event)]
 pub struct CreateCampsite;

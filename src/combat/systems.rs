@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use rand::Rng;
 
-use crate::{get_nearest_entity, ui::events::{EntityAttacked, DestroyUi}, Inventory, GoldCoin, common::components::{BoundingBox, Velocity, Targetable}, Coin};
+use crate::{get_nearest_entity, ui::events::{EntityAttacked, DestroyUi}, common::components::{BoundingBox, Velocity, Targetable}, game::gold::{Inventory, GoldCoin, Coin}};
 
 use super::{components::{FindTarget, HasTarget, Health}, events::{AttackEvent, PushBack}};
 
@@ -135,6 +135,7 @@ pub fn push_back(mut events: EventReader<PushBack>, mut query: Query<(Entity, &m
 
 pub fn kill_inventory(mut commands: Commands, query: Query<(Entity, &Health, &Inventory, &Transform)>, mut writer: EventWriter<DestroyUi>, asset_server: Res<AssetServer>)
 {
+    if query.is_empty() { return;}
     for entity in query.iter()
     {
         if entity.1.current <= 0.0 

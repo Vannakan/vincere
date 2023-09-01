@@ -3,13 +3,13 @@
 use bevy::prelude::*;
 use rand::Rng;
 
-use crate::{spawn_peasant2, ui::events::BindUi};
+use crate::{ui::events::BindUi, peasant::spawn_peasant2};
 
 pub struct CampPlugin;
 
 impl Plugin for CampPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_camp);
+        // app.add_systems(Startup, spawn_camp);
     }
 }
 

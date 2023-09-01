@@ -4,12 +4,12 @@ use bevy::prelude::*;
 mod components;
 mod tree;
 mod campsite;
-use crate::Tree;
 use self::components::*;
 use self::tree::*;
 use crate::combat::components::FindTarget;
 use crate::common::components::Velocity;
 use crate::combat::systems::global_find_target_with;
+use crate::game::tree::Tree;
 use crate::ui::components::HasUi;
 use crate::ui::events::BindUi;
 

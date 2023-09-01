@@ -1,7 +1,9 @@
 use bevy::prelude::*;
 
 use crate::combat::components::HasTarget;
-use crate::{Minion, change_state, MoveTo, Attack, BANDIT_ATTACK_RANGE};
+use crate::constants::BANDIT_ATTACK_RANGE;
+use crate::entities::minion::{MoveTo, Attack, Minion};
+use crate::change_state;
 use crate::common::components::Velocity;
 use super::{components::{Bandit, Idle}, attack::reset_bandit_state};
 
@@ -16,6 +18,14 @@ pub fn bandit_found_target(mut commands: Commands, query: Query<(Entity, &Bandit
         }
     }
 }
+
+//handle update target pos
+// pub fn update_target_translation(mut query: Query<&mut HasTarget2>, other: Query<(Entity, &Targetable, &Transform)>) {
+//      for mut has in query.iter_mut() {
+//         let target = other.get(has.entity).unwrap();
+//         has.position = target.2.translation;
+//      }
+// }
 
 pub fn move_to_minion(
     mut commands: Commands,

@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{Campsite, Inventory, Minimap, player::components::Player};
+use crate::{player::components::Player, game::{gold::Inventory, campsite::Campsite, camera::Minimap}};
 
 use super::{components::{UiTransformBinding, HasUi, EntityUiRoot, Root, HealthBar, TreeUi, PlayerGoldUi}, events::{DestroyUi, BindUi, EntityAttacked}, X_OFFSET, Y_OFFSET};
 pub fn destroy_ui(
@@ -214,18 +214,6 @@ pub fn create_gold_ui(mut commands: Commands, asset_server: Res<AssetServer>, qu
 
     root.with_children(|parent| {
         parent.spawn(
-        //     (ImageBundle{
-        //     style: Style { 
-        //         width: Val::Px(128.0),
-        //         height: Val::Px(128.0),
-        //         right: Val::Px(700.0),
-        //         bottom: Val::Px(200.0),
-        //         position_type: PositionType::Absolute,
-        //         ..Default::default()
-        //     },
-        //     image: asset_server.load("gold.png").into(),
-        //     ..Default::default()
-        // },
         (TextBundle::from_section(
             "Gold:",
             TextStyle {
@@ -248,7 +236,8 @@ pub fn update_player_gold_ui(mut p_query: Query<(&Player, &Inventory)>, mut ui_q
     text.sections[0].value = format!("Gold: {}", inventory.coins);
 }
 
-pub fn create_player_ui(mut commands: Commands, asset_server: Res<AssetServer>){
+pub fn create_player_ui(mut commands: Commands, asset_server: Res<AssetServer>, query: Query<&Player>){
+    if query.is_empty() { return; }
     commands.spawn(ImageBundle{
         style: Style { 
             width: Val::Px(128.0),

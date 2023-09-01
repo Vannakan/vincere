@@ -1,6 +1,6 @@
 use bevy::{prelude::*, window::PrimaryWindow};
 
-use crate::Minimap;
+use super::camera::Minimap;
 
 #[derive(Component)]
 pub struct Tree;

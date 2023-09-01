@@ -4,7 +4,10 @@ use bevy::prelude::*;
 use rand::Rng;
 use crate::combat::components::{HasTarget, FindTarget};
 use crate::common::constants::ACTION_COOLDOWN;
-use crate::{change_state,Tree, MoveTo, Campsite};
+use crate::entities::minion::MoveTo;
+use crate::game::campsite::Campsite;
+use crate::game::tree::Tree;
+use crate::{change_state};
 use crate::common::components::Velocity;
 
 use super::components::{CutTree, Builder, Action, MovingTo};

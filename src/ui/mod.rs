@@ -1,6 +1,6 @@
 use bevy::{prelude::*, ui::widget::UiImageSize};
 
-use crate::{Campsite, Inventory, Minimap, player::components::Player};
+use crate::{ player::components::Player};
 
 use self::{components::{UiTransformBinding, HasUi, EntityUiRoot, Root, HealthBar}, events::{DestroyUi, BindUi}};
 

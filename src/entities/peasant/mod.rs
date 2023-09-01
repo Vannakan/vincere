@@ -10,10 +10,10 @@ use bevy::prelude::*;
 use crate::builder::spawn_builder;
 use crate::combat::components::{Health, Damage};
 use crate::common::components::FollowPlayer;
+use crate::game::campsite::Campsite;
 use crate::player::components::Player;
 use crate::ui::components::HasUi;
 use crate::ui::events::{BindUi, DestroyUi};
-use crate::Campsite;
 use crate::common::components::Velocity;
 use crate::common::components::BoundingBox;
 
@@ -155,6 +155,7 @@ pub fn peasant_follow_player(
     mut minion_query: Query<(&mut Transform, &mut Velocity), (With<Peasant>, Without<Player>, With<FollowPlayer>)>,
     mut player_query: Query<&mut Transform, With<Player>>) 
 {
+    if player_query.is_empty() { return; }
     let player = player_query.single_mut();
     for mut minion in minion_query.iter_mut() {
         if minion.0.translation.distance(player.translation) <  150.0 { continue; }

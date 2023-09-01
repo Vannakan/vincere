@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 
-use crate::Minimap;
-use crate::common::components::Velocity;
+use crate::{common::components::Velocity, game::camera::Minimap};
 
 use super::{components::Player, PLAYER_SPEED};
 
