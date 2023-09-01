@@ -1,13 +1,21 @@
-
 use std::marker::PhantomData;
 
 use bevy::prelude::*;
+use bevy::window::PrimaryWindow;
 
-use crate::combat::components::*;
+use crate::combat::components::AttackInfo;
+use crate::combat::components::Attackable;
+use crate::combat::components::Attacks;
+use crate::combat::components::Damage;
+use crate::combat::components::FindTarget;
+use crate::combat::components::HasTarget;
+use crate::combat::components::Health;
 use crate::combat::events::AttackEvent;
 use crate::common::components::FollowPlayer;
 use crate::common::components::Targetable;
+use crate::common::components::BoundingBox;
 use crate::constants::WARRIOR_ATTACK_RANGE;
+use crate::game::camera::Minimap;
 use crate::player::components::Player;
 use crate::combat::systems::find_target_with_targetable;
 use crate::ui::components::HasUi;
@@ -32,6 +40,7 @@ impl Plugin for MinionPlugin {
          .add_systems(Update, default_minion)
          .add_systems(Update, stay_in_range::<Minion>)
          .add_systems(Update, enemy_defeated)
+         .add_systems(Update, check_bandit_click)
          .add_event::<SpawnMinion>();
     }
 } 
@@ -62,7 +71,6 @@ fn on_spawn_minions(mut commands: Commands, asset_server: Res<AssetServer>, mut 
         Minion,
         FollowPlayer,
         HasUi,
-        // Idle
         Attackable,
         Targetable,
         FindTarget::<Bandit> {
@@ -101,8 +109,6 @@ pub fn minion_follow_player(
 
 //Search for entities for a particular component.
 //Send out an event when you've found it
-
-
 
 fn minion_found_target(mut commands: Commands, query: Query<(Entity, &Minion), Added<HasTarget>>)
 {
@@ -147,8 +153,65 @@ fn reset_minion_state(mut commands: &mut Commands, entity: Entity){
     e.insert(FollowPlayer);
 }
 
+fn blank_minion_state(mut commands: &mut Commands, entity: Entity) {
+    let mut e = commands.get_entity(entity).unwrap();
+    e.remove::<Attack>();
+    e.remove::<HasTarget>();
+    e.remove::<MoveTo>();
+    e.remove::<FindTarget::<Bandit>>();
+    e.remove::<FollowPlayer>();
+}
+
 #[derive(Component)]
 pub struct Attack;
+
+#[derive(Event)]
+pub struct TargetClicked<T: Component>(Entity, PhantomData<T>);
+
+pub fn check_bandit_click(
+    input: Res<Input<MouseButton>>,
+    query: Query<(&BoundingBox, &Transform, Entity), With<Bandit>>,
+    q_windows: Query<&Window, With<PrimaryWindow>>,
+    camera_q: Query<(&Camera, &GlobalTransform), Without<Minimap>>,
+    m_query: Query<Entity, With<Minion>>,
+    mut commands: Commands){
+
+    if query.is_empty() { return; }
+    if m_query.is_empty() { return; }
+    if(input.just_released(MouseButton::Left)){
+        let (camera, camera_transform) = camera_q.single();
+        let mousePosition =  q_windows.single().cursor_position().unwrap();
+        let position =Vec3::from((camera.viewport_to_world_2d(camera_transform, mousePosition).unwrap(), 1.0));
+
+        for entity in query.iter(){
+            let a_pos = entity.1.translation;
+            let a_aabb = entity.0;
+            let b_pos = position;
+            let b_aabb = BoundingBox{
+                height: 5.0,
+                width: 5.0
+            };
+
+            if a_aabb.intersects(a_pos, &b_aabb, b_pos) == false { continue; }
+
+            // TODO: IF FINDS CLOSER TARGET, ATTACK THAT INSTEAD
+
+            for minion in m_query.iter(){
+                blank_minion_state(&mut commands, minion);
+                change_state::<FollowPlayer>(&mut commands, minion, HasTarget{target: Some(entity.2)}) 
+            }
+        }
+    }
+}
+
+
+// maybe bands/groups move around in a "flock". Flock being a radius that if
+//you click into, warriors will "seek" to the flock and attack the closest enemy to them
+//if there are X warriors on a bandit
+//find another bandit nearby
+//if there are no other bandits
+//attack that bandit
+
 
 pub fn handle_move_to_bandit(
     mut commands: Commands,
@@ -213,9 +276,6 @@ pub fn stay_in_range<TAttacker: Component>
 
 #[derive(Component)]
 pub struct MoveTo;
-
-
-
 
 pub fn default_minion(mut commands: Commands, query: Query<Entity, (With<Minion>, Without<MoveTo>, Without<HasTarget>, Without<FollowPlayer>, Without<Attack>, Without<MoveTo>)>){
     if query.is_empty() { return; }
